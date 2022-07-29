@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<robot name="mobile_robot" xmlns:xacro="http://ros.org/wiki/xacro">
+
+	<material name="red">
+		<color rgba="1 0 0 1"/>
+	</material>
+
+	<material name="white">
+		<color rgba="1 1 1 1"/>
+	</material>
+
+	<material name="black">
+		<color rgba="0 0 0 1"/>
+	</material>
+
+	<material name="green">
+		<color rgba="0.0 0.8 0.0 1.0"/>
+	</material>
+
+	<material name="brown">
+		<color rgba="0.35 0.23 0.12 1.0"/>
+	</material>	
+
+	<link name="base_link">
+		<collision>
+			<origin rpy="0 0 0" xyz="0 0 0.0005"/>
+			<geometry>
+				<box size="0.22 0.22 0.001"/>
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="base_link_joint" type="fixed">
+		<origin xyz="0 0 0.017" rpy="0 0 -1.5708"/>
+ 		<parent link="base_link"/>
+		<child link="base_plate_link"/>
+	</joint>
+
+	<link name="base_plate_link">
+		<visual>
+            		<origin rpy="0 0 0" xyz="0.0 0.063 -0.004"/>
+			<geometry>
+				<mesh filename="package://robot_driver/stl/two_wheeled_chasis_floor_level.stl" scale="0.001 0.001 0.001"/> 
+			</geometry>
+			<material name="brown"/>
+		</visual>
+		<collision>
+			<origin rpy="0 0 0" xyz="0.0 0.063 -0.004"/>
+			<geometry>
+				<mesh filename="package://robot_driver/stl/two_wheeled_chasis_floor_level.stl" scale="0.001 0.001 0.001"/> 
+			</geometry>
+		</collision>
+	</link>
+	<joint name="right_wheel_joint" type="continuous">
+		<origin xyz="0.07 0.0 0.023" rpy="0 0 0" />
+		<parent link="base_plate_link" />
+		<child link="right_wheel_link" />
+		<axis xyz="-1 0 0" />
+	</joint>
+
+	<link name="right_wheel_link">
+		<visual>
+			<origin rpy="0 0 0" xyz="0.025 0.0 0.0"/>
+			<geometry>
+				<mesh filename="package://robot_driver/stl/two_wheeled_wheel_mesh.stl" scale="0.001 0.001 0.001"/> 
+			</geometry>
+			<material name="red"/>
+		</visual>
+		<collision>
+			<origin rpy="0 0 0" xyz="0.025 0.0 0.0"/>
+			<geometry>
+				<mesh filename="package://robot_driver/stl/two_wheeled_wheel_mesh.stl" scale="0.001 0.001 0.001" />
+			</geometry>
+		</collision>
+	</link>   
+    
+	<joint name="left_wheel_joint" type="continuous">
+		<origin xyz="-0.07 0.0 0.023" rpy="0 0 0" />
+		<parent link="base_plate_link" />
+		<child link="left_wheel_link" />
+		<axis xyz="-1 0 0" />
+	</joint>
+
+	<link name="left_wheel_link">
+		<visual>
+			<origin rpy="0 0 0" xyz="-0.025 0.0 0.0"/>
+			<geometry>
+				<mesh filename="package://robot_driver/stl/two_wheeled_wheel_mesh.stl" scale="0.001 0.001 0.001"/> 
+			</geometry>
+			<material name="red"/>
+		</visual>
+		<collision>
+			<origin rpy="0 0 0" xyz="-0.025 0.0 0.0"/>
+			<geometry>
+				<mesh filename="package://robot_driver/stl/two_wheeled_wheel_mesh.stl" scale="0.001 0.001 0.001" />
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="laser_joint" type="fixed">
+		<origin xyz="0.0 0.123 0.11785" rpy="0 0 -1.5708"/>
+		<parent link="base_plate_link"/>
+		<child link="laser"/>
+	</joint>
+
+	<link name="laser">
+		<visual>
+			<origin rpy="0 0 1.5708" xyz="0.0 0.0 0.0"/>
+			<geometry>
+				<mesh filename="package://robot_driver/stl/rplidar_mesh_centered.stl" scale="0.0001 0.0001 0.0001"/>
+			</geometry>
+			<material name="white"/>
+		</visual>
+		<collision>
+			<origin rpy="0 0 1.5708" xyz="0.0 0.0 0.0"/>
+			<geometry>
+				<mesh filename="package://robot_driver/stl/rplidar_mesh_centered.stl" scale="0.0001 0.0001 0.0001"/>
+			</geometry>
+		</collision>
+	</link>
+
+</robot>

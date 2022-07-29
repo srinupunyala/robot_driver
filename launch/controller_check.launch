@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+	<rosparam file="$(find robot_driver)/config/controllers.yaml" command="load"/>
+	<rosparam file="$(find robot_driver)/config/joint_limits.yaml" command="load"/>
+
+	<arg name="model" default="$(find robot_driver)/urdf/mobile_robot.urdf.xacro"/>
+
+	<param name="robot_description" command="$(find xacro)/xacro.py $(arg model)"/>
+
+	<node name="robot_hardware_interface" pkg="robot_driver" type="robot_driver" output="screen">
+		<remap from="/mobile_robot/mobile_base_controller/cmd_vel" to="/cmd_vel"/>
+	</node>
+        <node name="robot_sate_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+	</node>
+	
+	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="/mobile_robot/joints_update /mobile_robot/mobile_base_controller">
+	</node>
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_driver)/config/saved_config.rviz"/>
+</launch>
