@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdint.h>
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>

@@ -54,8 +54,8 @@ void RobotHardwareInterface::read() {
     pos = pos | rbuff[i];
   }
   //m_left_motor_pos += pos;
-  pos /= 2475.0*0.2513274; 
-  m_joint_pos[0] = pos;
+  double pos_p = (pos/618.75)*0.2513274; 
+  m_joint_pos[0] = pos_p;
 
   pos = rbuff[7];
   for (int i=6;i>=4;--i) {
@@ -63,8 +63,8 @@ void RobotHardwareInterface::read() {
     pos = pos | rbuff[i];
   }
   //m_right_motor_pos += pos;
-  pos /= 2475.0*0.2513274; 
-  m_joint_pos[1] = pos;
+  pos_p = (pos/618.75)*0.2513274; 
+  m_joint_pos[1] = pos_p;
 }
 
 void RobotHardwareInterface::write(ros::Duration elapsed_time) {
