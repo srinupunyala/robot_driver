@@ -21,6 +21,8 @@
 		 default="true"
 		 user="jetnano"
         />
+	<param name="base_frame_id" value="base_link"/>
+	<param name="odom_frame_id" value="odom"/>
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 	<node machine="jetnano-desktop" name="robot_driver" pkg="robot_driver" type="robot_driver" output="log">
 		<param name="base_frame_id" value="base_link"/>

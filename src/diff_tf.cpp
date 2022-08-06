@@ -11,14 +11,9 @@ long OdomPublisher::kEncoderHighWrap = (kEncoderMax - kEncoderMin) * 0.7 + kEnco
 
 OdomPublisher::OdomPublisher(ros::NodeHandle &nh):
         m_tf_broadcaster(tf::TransformBroadcaster()), m_left_enc_mult(0), m_right_enc_mult(0) {
-    if (nh.getParam("/base_frame_id", m_base_frame_id)) {
-        ROS_FATAL("Failed to get param: base_frame_id");
-        return;
-    }
-    if (nh.getParam("/odom_frame_id", m_odom_frame_id)) {
-        ROS_FATAL("Failed to get param: odom_frame_id");
-        return;
-    }
+    m_base_frame_id = "base_link";
+    m_odom_frame_id = "odom";
+    ROS_INFO("base_fram_id:%s, odom_frame_id:%s", m_base_frame_id.c_str(), m_odom_frame_id.c_str());
     m_odom_publisher = nh.advertise<nav_msgs::Odometry>("odom", 10);
     ros::Duration update_freq(1.0/kRate);
     ROS_INFO("OdomPublisher launched");
@@ -133,12 +128,12 @@ void OdomPublisher::read() {
 int main(int argc, char **argv) {
     ros::init(argc, argv, "robot_driver");
     ros::NodeHandle nh;
+    ros::MultiThreadedSpinner spinner(2);
     TwistToMotors tm(nh);
     ros::Subscriber sub = nh.subscribe("cmd_vel", 1000, &TwistToMotors::twistCallback, &tm);
-    nh.createTimer(0.03, &TwistToMotors::spin, &tm); 
+    ros::Timer t1 = nh.createTimer(0.1, &TwistToMotors::spin, &tm); 
     OdomPublisher op(nh);
-    nh.createTimer(0.03, &OdomPublisher::spin, &op);
-    ros::MultiThreadedSpinner spinner(2);
+    ros::Timer t2 = nh.createTimer(0.1, &OdomPublisher::spin, &op);
     spinner.spin();
     return 0;
 }
