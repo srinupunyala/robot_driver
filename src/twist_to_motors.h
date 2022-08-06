@@ -23,6 +23,7 @@ class TwistToMotors {
         i2c_ros::I2C m_motors_control=i2c_ros::I2C(0, 0x08);
 
     private:
+        ros::NodeHandle m_nh;
         double m_left;
         double m_right;
         double m_dx;

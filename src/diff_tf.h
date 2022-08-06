@@ -20,6 +20,7 @@ class OdomPublisher {
         void read();
 
     private:
+        ros::NodeHandle m_nh;
         ros::Publisher m_odom_publisher;
         tf::TransformBroadcaster m_tf_broadcaster;
         ros::Time m_prev;

@@ -1,7 +1,7 @@
 #include "twist_to_motors.h"
 
 TwistToMotors::TwistToMotors(ros::NodeHandle& nh)
-: m_left(0), m_right(0), m_dx(0), m_dy(0), m_dr(0), m_tick_counter(4), m_ticks_since_target(0) {
+: m_nh(nh),m_left(0), m_right(0), m_dx(0), m_dy(0), m_dr(0), m_tick_counter(4), m_ticks_since_target(0) {
     ROS_INFO("TwistToMotors launching");
     m_ticks_since_target = m_tick_counter;
     ros::Duration update_freq(1.0/kRate);

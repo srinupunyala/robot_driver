@@ -21,12 +21,13 @@ OdomPublisher::OdomPublisher(ros::NodeHandle &nh):
     }
     m_odom_publisher = nh.advertise<nav_msgs::Odometry>("odom", 10);
     ros::Duration update_freq(1.0/kRate);
-    nh.createTimer(update_freq, &OdomPublisher::spin, this);
     ROS_INFO("OdomPublisher launched");
 }
 
 void OdomPublisher::spin(const ros::TimerEvent&) {
+    ROS_INFO("OdomPublisher::spin called!");
     if(ros::ok()) {
+        ROS_INFO("OdomPublisher::spin called!");
         read();
         update();
     }
@@ -34,8 +35,8 @@ void OdomPublisher::spin(const ros::TimerEvent&) {
 
 void OdomPublisher::update() {
     ros::Time now = ros::Time::now();
-    if (now <= m_t_next)
-        return;
+    //if (now <= m_t_next)
+    //    return;
     double elapsed_secs = (now - m_prev).toSec();
     m_prev = now;
 
@@ -136,6 +137,7 @@ int main(int argc, char **argv) {
     ros::Subscriber sub = nh.subscribe("cmd_vel", 1000, &TwistToMotors::twistCallback, &tm);
     nh.createTimer(0.03, &TwistToMotors::spin, &tm); 
     OdomPublisher op(nh);
+    nh.createTimer(0.03, &OdomPublisher::spin, &op);
     ros::MultiThreadedSpinner spinner(2);
     spinner.spin();
     return 0;
