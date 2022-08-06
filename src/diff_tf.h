@@ -5,11 +5,14 @@
 #include "ros/ros.h"
 #include "ros/time.h"
 #include <tf/transform_broadcaster.h>
+#include <controller_manager/controller_manager.h>
+#include <hardware_interface/joint_state_interface.h>
+#include <hardware_interface/robot_hw.h>
 
 #include "string"
 
 
-class OdomPublisher {
+class OdomPublisher: public hardware_interface::RobotHW {
     public:
         OdomPublisher(ros::NodeHandle &nh);
 
@@ -24,7 +27,9 @@ class OdomPublisher {
         ros::Publisher m_odom_publisher;
         tf::TransformBroadcaster m_tf_broadcaster;
         ros::Time m_prev;
-        
+        std::shared_ptr<controller_manager::ControllerManager> m_controller_manager;
+        hardware_interface::JointStateInterface m_joint_state_interface;
+
     private:
         i2c_ros::I2C m_motors_control=i2c_ros::I2C(0, 0x08);
         
@@ -47,8 +52,14 @@ class OdomPublisher {
 
         ros::Time m_t_next;
 
+    private:
+        double m_joint_vel[2];
+        double m_joint_eff[2];
+        double m_joint_pos[2];
+
 
     private:
+        std::string m_joint_names[2] = {"left_wheel_joint", "right_wheel_joint"};
         static constexpr double kBaseWidth = 0.19;
         static const int kRate = 30;
         static constexpr double kTicksPerMeter = 9847.712104092492;

@@ -6,25 +6,38 @@
 #include <geometry_msgs/Quaternion.h>
 #include <nav_msgs/Odometry.h>
 
+using hardware_interface::JointStateHandle;
+
+
 long OdomPublisher::kEncoderLowWrap = (kEncoderMax - kEncoderMin) * 0.3 + kEncoderMin;
 long OdomPublisher::kEncoderHighWrap = (kEncoderMax - kEncoderMin) * 0.7 + kEncoderMin;
 
-OdomPublisher::OdomPublisher(ros::NodeHandle &nh):
-        m_tf_broadcaster(tf::TransformBroadcaster()), m_left_enc_mult(0), m_right_enc_mult(0) {
+OdomPublisher::OdomPublisher(ros::NodeHandle &nh)
+: m_tf_broadcaster(tf::TransformBroadcaster()), m_left_enc_mult(0), m_right_enc_mult(0) {
+    m_x = 0; m_y=0; m_th=0;
     m_base_frame_id = "base_link";
     m_odom_frame_id = "odom";
     ROS_INFO("base_fram_id:%s, odom_frame_id:%s", m_base_frame_id.c_str(), m_odom_frame_id.c_str());
     m_odom_publisher = nh.advertise<nav_msgs::Odometry>("odom", 10);
     ros::Duration update_freq(1.0/kRate);
     ROS_INFO("OdomPublisher launched");
+
+    m_controller_manager.reset(new controller_manager::ControllerManager(this, nh));
+    for (int i=0; i<2; ++i) {
+        JointStateHandle joint_state_handle(m_joint_names[i], &m_joint_pos[i], &m_joint_vel[i], &m_joint_eff[i]);
+        m_joint_state_interface.registerHandle(joint_state_handle);
+    }
+    registerInterface(&m_joint_state_interface);
 }
 
-void OdomPublisher::spin(const ros::TimerEvent&) {
+void OdomPublisher::spin(const ros::TimerEvent& e) {
+    auto elapsed_time = ros::Duration(e.current_real - e.last_real);
     ROS_INFO("OdomPublisher::spin called!");
     if(ros::ok()) {
         ROS_INFO("OdomPublisher::spin called!");
         read();
         update();
+        m_controller_manager->update(ros::Time::now(), elapsed_time);
     }
 }
 
@@ -53,9 +66,11 @@ void OdomPublisher::update() {
         double x = cos(th) * dist;
         double y = -sin(th) * dist;
 
-        m_x = m_x + (cos(th) * x - sin(th) * y);
-        m_y = m_y + (sin(th) * x + cos(th) * y);
+        m_x = m_x + (cos(m_th) * x - sin(m_th) * y);
+        m_y = m_y + (sin(m_th) * x + cos(m_th) * y);
     }
+    m_joint_pos[0] = m_x;
+    m_joint_pos[1] = m_y;
     if (th != 0) {
         m_th = m_th + th;
     }
@@ -84,7 +99,7 @@ void OdomPublisher::update() {
     tf::quaternionMsgToTF(quaternion, tf_quaternion);
     tfm.setRotation(tf_quaternion);
     m_tf_broadcaster.sendTransform(
-        tf::StampedTransform(tfm, ros::Time::now(), m_base_frame_id, m_odom_frame_id));
+        tf::StampedTransform(tfm, ros::Time::now(), m_odom_frame_id, m_base_frame_id));
     m_odom_publisher.publish(odom);
 }
 
@@ -131,9 +146,9 @@ int main(int argc, char **argv) {
     ros::MultiThreadedSpinner spinner(2);
     TwistToMotors tm(nh);
     ros::Subscriber sub = nh.subscribe("cmd_vel", 1000, &TwistToMotors::twistCallback, &tm);
-    ros::Timer t1 = nh.createTimer(0.1, &TwistToMotors::spin, &tm); 
+    ros::Timer t1 = nh.createTimer(ros::Duration(0.03), &TwistToMotors::spin, &tm); 
     OdomPublisher op(nh);
-    ros::Timer t2 = nh.createTimer(0.1, &OdomPublisher::spin, &op);
+    ros::Timer t2 = nh.createTimer(ros::Duration(0.03), &OdomPublisher::spin, &op);
     spinner.spin();
     return 0;
 }
