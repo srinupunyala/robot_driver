@@ -13,13 +13,13 @@ long OdomPublisher::kEncoderLowWrap = (kEncoderMax - kEncoderMin) * 0.3 + kEncod
 long OdomPublisher::kEncoderHighWrap = (kEncoderMax - kEncoderMin) * 0.7 + kEncoderMin;
 
 OdomPublisher::OdomPublisher(ros::NodeHandle &nh)
-: m_tf_broadcaster(tf::TransformBroadcaster()), m_left_enc_mult(0), m_right_enc_mult(0) {
-    m_x = 0; m_y=0; m_th=0;
+: m_tf_broadcaster(tf::TransformBroadcaster()), m_left_last_pos(0), m_right_last_pos(0),
+  m_left_enc_pos(0), m_right_enc_pos(0), m_last_left_enc_pos(0), m_last_right_enc_pos(0),
+  m_left_enc_mult(0), m_right_enc_mult(0), m_x(0), m_y(0), m_th(0) {
     m_base_frame_id = "base_link";
     m_odom_frame_id = "odom";
     ROS_INFO("base_fram_id:%s, odom_frame_id:%s", m_base_frame_id.c_str(), m_odom_frame_id.c_str());
     m_odom_publisher = nh.advertise<nav_msgs::Odometry>("odom", 10);
-    ros::Duration update_freq(1.0/kRate);
     ROS_INFO("OdomPublisher launched");
 
     m_controller_manager.reset(new controller_manager::ControllerManager(this, nh));
@@ -36,17 +36,16 @@ void OdomPublisher::spin(const ros::TimerEvent& e) {
     if(ros::ok()) {
         ROS_INFO("OdomPublisher::spin called!");
         read();
-        update();
+        update(e);
         m_controller_manager->update(ros::Time::now(), elapsed_time);
     }
 }
 
-void OdomPublisher::update() {
-    ros::Time now = ros::Time::now();
+void OdomPublisher::update(const ros::TimerEvent& e) {
+    auto elapsed_time = ros::Duration(e.current_real - e.last_real);
     //if (now <= m_t_next)
     //    return;
-    double elapsed_secs = (now - m_prev).toSec();
-    m_prev = now;
+    double elapsed_secs = elapsed_time.toSec();
 
     double d_left=0, d_right=0;
     if (m_left_enc_pos != 0)
@@ -82,7 +81,7 @@ void OdomPublisher::update() {
     quaternion.w = cos(m_th / 2);
 
     nav_msgs::Odometry odom;
-    odom.header.stamp = now;
+    odom.header.stamp = ros::Time::now();
     odom.header.frame_id = m_odom_frame_id;
     odom.pose.pose.position.x = m_x;
     odom.pose.pose.position.y = m_y;
@@ -135,7 +134,6 @@ void OdomPublisher::read() {
 
     if (r_pos > kEncoderHighWrap && m_last_right_enc_pos < kEncoderLowWrap)
         m_right_enc_mult -= 1;
-
     m_right_enc_pos = 1.0 * (r_pos + m_right_enc_mult * (kEncoderMax - kEncoderMin));
     m_last_right_enc_pos = r_pos;
 }
@@ -146,9 +144,10 @@ int main(int argc, char **argv) {
     ros::MultiThreadedSpinner spinner(2);
     TwistToMotors tm(nh);
     ros::Subscriber sub = nh.subscribe("cmd_vel", 1000, &TwistToMotors::twistCallback, &tm);
-    ros::Timer t1 = nh.createTimer(ros::Duration(0.03), &TwistToMotors::spin, &tm); 
+    ros::Duration update_freq(1.0/30);
+    ros::Timer t1 = nh.createTimer(update_freq, &TwistToMotors::spin, &tm); 
     OdomPublisher op(nh);
-    ros::Timer t2 = nh.createTimer(ros::Duration(0.03), &OdomPublisher::spin, &op);
+    ros::Timer t2 = nh.createTimer(update_freq, &OdomPublisher::spin, &op);
     spinner.spin();
     return 0;
 }

@@ -18,7 +18,7 @@ class OdomPublisher: public hardware_interface::RobotHW {
 
         void spin(const ros::TimerEvent&);
 
-        void update();
+        void update(const ros::TimerEvent& e);
 
         void read();
 
@@ -60,7 +60,7 @@ class OdomPublisher: public hardware_interface::RobotHW {
 
     private:
         std::string m_joint_names[2] = {"left_wheel_joint", "right_wheel_joint"};
-        static constexpr double kBaseWidth = 0.19;
+        static constexpr double kBaseWidth = 0.193;
         static const int kRate = 30;
         static constexpr double kTicksPerMeter = 9847.712104092492;
         static const long kEncoderMin = -2147483648;
