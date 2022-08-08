@@ -32,9 +32,7 @@ OdomPublisher::OdomPublisher(ros::NodeHandle &nh)
 
 void OdomPublisher::spin(const ros::TimerEvent& e) {
     auto elapsed_time = ros::Duration(e.current_real - e.last_real);
-    ROS_INFO("OdomPublisher::spin called!");
     if(ros::ok()) {
-        ROS_INFO("OdomPublisher::spin called!");
         read();
         update(e);
         m_controller_manager->update(ros::Time::now(), elapsed_time);
@@ -111,7 +109,7 @@ void OdomPublisher::read() {
         l_pos = l_pos << 8;
         l_pos = l_pos | rbuff[i];
     }
-    if (rbuff[9] & 1)
+    if (rbuff[8] & 1)
         l_pos *= -1;
 
     r_pos = rbuff[7];
@@ -119,8 +117,9 @@ void OdomPublisher::read() {
         r_pos = r_pos << 8;
         r_pos = r_pos | rbuff[i];
     }
-    if (rbuff[9] & 2)
+    if (rbuff[8] & 2)
         r_pos *= -1;
+    l_pos *= -1;  
 
     if (l_pos < kEncoderLowWrap && m_last_left_enc_pos > kEncoderHighWrap)
         m_left_enc_mult += 1;
@@ -131,7 +130,6 @@ void OdomPublisher::read() {
 
     if (r_pos < kEncoderLowWrap && m_last_right_enc_pos > kEncoderHighWrap)
         m_right_enc_mult += 1;
-
     if (r_pos > kEncoderHighWrap && m_last_right_enc_pos < kEncoderLowWrap)
         m_right_enc_mult -= 1;
     m_right_enc_pos = 1.0 * (r_pos + m_right_enc_mult * (kEncoderMax - kEncoderMin));
