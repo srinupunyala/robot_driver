@@ -110,7 +110,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
   LIBRARIES robot_driver
-  CATKIN_DEPENDS diff_drive_controller roscpp std_msgs geometry_msgs nav_msgs
+  CATKIN_DEPENDS roscpp std_msgs geometry_msgs nav_msgs
 #  DEPENDS system_lib
 )
 
@@ -146,7 +146,7 @@ include_directories(
 ## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
 # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
 
-add_executable(${PROJECT_NAME} src/i2c_ros.cpp src/diff_tf.cpp src/twist_to_motor.cpp)
+add_executable(${PROJECT_NAME} src/i2c_ros.cpp src/robot_driver_v2.cpp)
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 	<rosparam file="$(find robot_driver)/config/controllers.yaml" command="load"/>
+	<rosparam file="$(find robot_driver)/config/joint_limits.yaml" command="load"/>
 	<arg name="model" default="$(find robot_driver)/urdf/mobile_robot.urdf.xacro"/>
 	<param name="robot_description" command="$(find xacro)/xacro $(arg model)"/>
 
