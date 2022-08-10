@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="map_file" default="$(find robot_driver)/maps/layout.yaml"/>
+  <arg name="model" default="$(find robot_driver)/urdf/mobile_robot.urdf.xacro"/>
+  
+  <rosparam file="$(find robot_driver)/config/controllers.yaml" command="load"/>
+  <rosparam file="$(find robot_driver)/config/joint_limits.yaml" command="load"/>
+ 
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+    
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_driver)/config/Anavi.rviz"/>
+
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="/mobile_robot/joints_update"/>
+
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" >
+  </node>
+
+  <include file="$(find robot_driver)/launch/amcl.launch" />
+  <include file="$(find robot_driver)/launch/movebase.launch" /> 
+
+	<machine name="jetnano-desktop"
+		 address="jetnano-desktop"
+		 env-loader="/home/jetnano/catkin_ws/devel/env_remote1.sh"
+		 default="true"
+		 user="jetnano"
+        />
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+	<node machine="jetnano-desktop" name="robot_driver" pkg="robot_driver" type="robot_driver" output="log">
+		<param name="base_frame_id" value="base_link"/>
+		<param name="odom_frame_id" value="odom"/>
+	</node>
+  <include file="$(find rplidar_ros)/launch/rplidar.launch" />
+</launch>

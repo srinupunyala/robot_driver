@@ -1,0 +1,9 @@
+<launch>
+   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find robot_driver)/config/common_costmap.yaml" command="load" ns="global_costmap" /> 
+    <rosparam file="$(find robot_driver)/config/common_costmap.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find robot_driver)/config/local_costmap.yaml" command="load" />
+    <rosparam file="$(find robot_driver)/config/global_costmap.yaml" command="load" /> 
+    <rosparam file="$(find robot_driver)/config/base_local_costmap.yaml" command="load" />
+ </node>
+</launch> 
