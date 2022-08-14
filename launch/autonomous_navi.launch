@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-  <arg name="map_file" default="$(find robot_driver)/maps/layout.yaml"/>
+  <arg name="map_file" default="$(find robot_driver)/maps/layout2.yaml"/>
   <arg name="model" default="$(find robot_driver)/urdf/mobile_robot.urdf.xacro"/>
   
   <rosparam file="$(find robot_driver)/config/controllers.yaml" command="load"/>
@@ -9,7 +9,7 @@
  
   <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
     
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_driver)/config/Anavi.rviz"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_driver)/config/navigation.rviz"/>
 
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="/mobile_robot/joints_update"/>
 

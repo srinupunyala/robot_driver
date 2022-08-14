@@ -150,13 +150,23 @@ void RobotDriverV2::readMotorsPosition() {
 void RobotDriverV2::writeCmdToMotors(const ros::TimerEvent& event) {
     if (m_ticks_since_target < m_tick_counter) {
         ros::Duration elapsed_time = ros::Duration(event.current_real - event.last_real);
-        m_velocity_joint_saturation_interface.enforceLimits(elapsed_time);
         unsigned char wbuff[3];
         m_joint_cmd[0] = (1.0 * m_dx - m_dr * kBaseWidth / 2);
         m_joint_cmd[1] = (1.0 * m_dx + m_dr * kBaseWidth / 2);
+        //m_velocity_joint_saturation_interface.enforceLimits(elapsed_time);
+        if (m_joint_cmd[0] > 0.5)
+            m_joint_cmd[0] = 0.5;
+        if (m_joint_cmd[0] < -0.5)
+            m_joint_cmd[0] = -0.5;
+                
+        if (m_joint_cmd[1] > 0.5)
+            m_joint_cmd[1] = 0.5;
+        if (m_joint_cmd[1] < -0.5)
+            m_joint_cmd[1] = -0.5;
+        
         if (1) {//m_joint_cmd[0] != m_left_last_cmd || m_joint_cmd[1] != m_right_last_cmd) {
-            int l_cmd_rpm = (int)((1.0 * m_dx - m_dr * kBaseWidth / 2) *60.0/0.25);
-            int r_cmd_rpm = (int)((1.0 * m_dx + m_dr * kBaseWidth / 2) *60.0/0.25);
+            int l_cmd_rpm = (int)(m_joint_cmd[0] *60.0/0.25);
+            int r_cmd_rpm = (int)(m_joint_cmd[1] *60.0/0.25);
             int l_dir = 0;
             int r_dir = 0;
             wbuff[2] = 0;
