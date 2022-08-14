@@ -1,8 +1,12 @@
-global_frame: odom
-rolling_window: true
-width: 1.5
-height: 1.5
+local_costmap:
+  global_frame: odom
+  robot_base_fram: /base_link
+  rolling_window: true
+  width: 4.0
+  height: 4.0
+  static_map: false
 
-plugins:
-  - {name: obstacles_laser,           type: "costmap_2d::ObstacleLayer"}
-  - {name: inflation_l,                 type: "costmap_2d::InflationLayer"}
+
+  plugins:
+    - {name: obstacles_laser,           type: "costmap_2d::ObstacleLayer"}
+    - {name: inflation_l,                 type: "costmap_2d::InflationLayer"}

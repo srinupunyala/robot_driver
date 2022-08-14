@@ -5,5 +5,7 @@
     <rosparam file="$(find robot_driver)/config/local_costmap.yaml" command="load" />
     <rosparam file="$(find robot_driver)/config/global_costmap.yaml" command="load" /> 
     <rosparam file="$(find robot_driver)/config/base_local_costmap.yaml" command="load" />
+    <rosparam file="$(find robot_driver)/config/dwa_local_planner_params.yaml" command="load" />
+    <rosparam file="$(find robot_driver)/config/move_base_params.yaml" command="load" />
  </node>
 </launch> 

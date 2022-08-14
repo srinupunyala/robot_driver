@@ -154,15 +154,17 @@ void RobotDriverV2::writeCmdToMotors(const ros::TimerEvent& event) {
         m_joint_cmd[0] = (1.0 * m_dx - m_dr * kBaseWidth / 2);
         m_joint_cmd[1] = (1.0 * m_dx + m_dr * kBaseWidth / 2);
         //m_velocity_joint_saturation_interface.enforceLimits(elapsed_time);
-        if (m_joint_cmd[0] > 0.5)
-            m_joint_cmd[0] = 0.5;
-        if (m_joint_cmd[0] < -0.5)
-            m_joint_cmd[0] = -0.5;
+        double kMaxLimit = 0.3;
+        double kMinLimit = -0.3;
+        if (m_joint_cmd[0] > kMaxLimit)
+            m_joint_cmd[0] = kMaxLimit;
+        if (m_joint_cmd[0] < kMinLimit)
+            m_joint_cmd[0] = kMinLimit;
                 
-        if (m_joint_cmd[1] > 0.5)
-            m_joint_cmd[1] = 0.5;
-        if (m_joint_cmd[1] < -0.5)
-            m_joint_cmd[1] = -0.5;
+        if (m_joint_cmd[1] > kMaxLimit)
+            m_joint_cmd[1] = kMaxLimit;
+        if (m_joint_cmd[1] < kMinLimit)
+            m_joint_cmd[1] = kMinLimit;
         
         if (1) {//m_joint_cmd[0] != m_left_last_cmd || m_joint_cmd[1] != m_right_last_cmd) {
             int l_cmd_rpm = (int)(m_joint_cmd[0] *60.0/0.25);
@@ -172,11 +174,11 @@ void RobotDriverV2::writeCmdToMotors(const ros::TimerEvent& event) {
             wbuff[2] = 0;
             if (l_cmd_rpm < 0) {
                 l_cmd_rpm *= -1;
-            wbuff[2] = 1;
+                wbuff[2] = 1;
             }
             if (r_cmd_rpm < 0) {
                 r_cmd_rpm *= -1;
-            wbuff[2] |= 2;
+                wbuff[2] |= 2;
             }
             wbuff[0] = l_cmd_rpm;
             wbuff[1] = r_cmd_rpm;
