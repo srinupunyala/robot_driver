@@ -3,6 +3,7 @@
 #include <ros/console.h>
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Quaternion.h>
+#include <sensor_msgs/Range.h>
 #include <joint_limits_interface/joint_limits.h>
 #include <joint_limits_interface/joint_limits_rosparam.h>
 
@@ -16,11 +17,12 @@ long RobotDriverV2::kEncoderLowWrap = (kEncoderMax - kEncoderMin) * 0.3 + kEncod
 long RobotDriverV2::kEncoderHighWrap = (kEncoderMax - kEncoderMin) * 0.7 + kEncoderMin;
 
 RobotDriverV2::RobotDriverV2(ros::NodeHandle& nh): m_nh(nh), m_tf_broadcaster(tf::TransformBroadcaster()),
-        m_base_frame_id("base_link"), m_odom_frame_id("odom"), m_left_last_pos(0), m_right_last_pos(0),
-        m_left_enc_pos(0), m_right_enc_pos(0), m_last_left_enc_pos(0), m_last_right_enc_pos(0), m_left_enc_mult(0),
-        m_right_enc_mult(0), m_x(0), m_y(0), m_th(0), m_left(0), m_right(0), m_dx(0), m_dy(0), m_dr(0),
-        m_tick_counter(4), m_ticks_since_target(m_tick_counter) {
+        m_base_frame_id("base_link"), m_odom_frame_id("odom"), m_sonar_frame_id("sonar"), m_sonar_measurement(0),
+        m_left_last_pos(0), m_right_last_pos(0), m_left_enc_pos(0), m_right_enc_pos(0), m_last_left_enc_pos(0),
+        m_last_right_enc_pos(0), m_left_enc_mult(0), m_right_enc_mult(0), m_x(0), m_y(0), m_th(0), m_left(0),
+        m_right(0), m_dx(0), m_dy(0), m_dr(0), m_tick_counter(4), m_ticks_since_target(m_tick_counter) {
     m_odom_publisher = m_nh.advertise<nav_msgs::Odometry>("odom", 10);
+    m_sonar_range_publisher = m_nh.advertise<sensor_msgs::Range>("sonar", 10);
     m_cmd_vel_subscriber = m_nh.subscribe("cmd_vel", 1000, &RobotDriverV2::twistCallback, this);
 
     for (int i=0; i<2; ++i) {
@@ -78,11 +80,11 @@ void RobotDriverV2::updatePosition(const ros::TimerEvent& event) {
     if (th != 0) {
         m_th = m_th + th;
     }
-    publishOdomAndTf();
+    publishOdomTfAndRange();
     m_controller_manager->update(ros::Time::now(), elapsed_time);
 }
 
-void RobotDriverV2::publishOdomAndTf() {
+void RobotDriverV2::publishOdomTfAndRange() {
     geometry_msgs::Quaternion quaternion;
     quaternion.x = 0.0;
     quaternion.y = 0.0;
@@ -109,12 +111,14 @@ void RobotDriverV2::publishOdomAndTf() {
     m_tf_broadcaster.sendTransform(
         tf::StampedTransform(tfm, ros::Time::now(), m_odom_frame_id, m_base_frame_id));
     m_odom_publisher.publish(odom);
+
+    publishSonarRange();
 }
 
 void RobotDriverV2::readMotorsPosition() {
-    unsigned char rbuff[9];
+    unsigned char rbuff[11];
     int l_pos, r_pos;
-    m_motors_control.readBytes(rbuff, 9);
+    m_motors_control.readBytes(rbuff, 11);
     l_pos = rbuff[3];
     for (int i=2;i>=0;--i) {
         l_pos = l_pos << 8;
@@ -144,7 +148,12 @@ void RobotDriverV2::readMotorsPosition() {
     if (r_pos > kEncoderHighWrap && m_last_right_enc_pos < kEncoderLowWrap)
         m_right_enc_mult -= 1;
     m_right_enc_pos = 1.0 * (r_pos + m_right_enc_mult * (kEncoderMax - kEncoderMin));
-    m_last_right_enc_pos = r_pos; 
+    m_last_right_enc_pos = r_pos;
+
+    int range = rbuff[10];
+    range = range << 8;
+    range = range | rbuff[9];
+    m_sonar_measurement = (double)(range) / 100.0; // conver to meters
 }
 
 void RobotDriverV2::writeCmdToMotors(const ros::TimerEvent& event) {
@@ -186,6 +195,19 @@ void RobotDriverV2::writeCmdToMotors(const ros::TimerEvent& event) {
         }
         m_ticks_since_target++;
     }
+}
+
+void RobotDriverV2::publishSonarRange() {
+    sensor_msgs::Range new_range;
+    new_range.header.frame_id = m_sonar_frame_id;
+    new_range.header.stamp = ros::Time::now();
+    new_range.radiation_type = sensor_msgs::Range::ULTRASOUND;
+    new_range.max_range = 1.0;
+    new_range.min_range = 0.0;
+    new_range.range = (m_sonar_measurement > new_range.max_range) ? new_range.max_range :
+                      ((m_sonar_measurement < new_range.min_range) ? new_range.min_range : m_sonar_measurement);
+    new_range.field_of_view = 0.261799;
+    m_sonar_range_publisher.publish(new_range);
 }
 
 void RobotDriverV2::twistCallback(const geometry_msgs::Twist& msg) {

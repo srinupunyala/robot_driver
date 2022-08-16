@@ -21,14 +21,17 @@ class RobotDriverV2: public hardware_interface::RobotHW {
 
         void readMotorsPosition();
 
-        void publishOdomAndTf();
+        void publishOdomTfAndRange();
 
         void writeCmdToMotors(const ros::TimerEvent& event);
+
+        void publishSonarRange();
 
         void twistCallback(const geometry_msgs::Twist& msg);
     private:
         ros::NodeHandle &m_nh;
         ros::Publisher m_odom_publisher;
+        ros::Publisher m_sonar_range_publisher;
         ros::Subscriber m_cmd_vel_subscriber;
         ros::Timer m_non_realtime_read_loop;
         ros::Timer m_non_realtime_write_loop;
@@ -44,6 +47,9 @@ class RobotDriverV2: public hardware_interface::RobotHW {
         
         std::string m_base_frame_id;
         std::string m_odom_frame_id;
+        std::string m_sonar_frame_id;
+
+        double m_sonar_measurement;
 
         int m_left_last_pos;
         int m_right_last_pos;

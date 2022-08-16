@@ -8,13 +8,13 @@
   <rosparam file="$(find robot_driver)/config/joint_limits.yaml" command="load"/>
  
   <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
-    
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_driver)/config/navigation.rviz"/>
-
-  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="/mobile_robot/joints_update"/>
 
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" >
   </node>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_driver)/config/navigation.rviz"/>
+
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="/mobile_robot/joints_update"/>
 
   <include file="$(find robot_driver)/launch/amcl.launch" />
   <include file="$(find robot_driver)/launch/movebase.launch" /> 

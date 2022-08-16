@@ -88,6 +88,11 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        sonar:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
@@ -113,6 +118,8 @@ Visualization Manager:
           Value: true
         right_wheel_link:
           Value: true
+        sonar:
+          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -128,6 +135,8 @@ Visualization Manager:
                 left_wheel_link:
                   {}
                 right_wheel_link:
+                  {}
+                sonar:
                   {}
       Update Interval: 0
       Value: true
@@ -249,6 +258,16 @@ Visualization Manager:
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
       Topic: /move_base/DWAPlannerROS/local_plan
+      Unreliable: false
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz/Range
+      Color: 255; 255; 255
+      Enabled: true
+      Name: Range
+      Queue Size: 100
+      Topic: /sonar
       Unreliable: false
       Value: true
   Enabled: true

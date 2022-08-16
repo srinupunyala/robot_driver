@@ -119,4 +119,26 @@
 		</collision>
 	</link>
 
+	<joint name="sonar_joint" type="fixed">
+		<origin xyz="0.0 0.163 0.025" rpy="0 0 1.5708"/>
+		<parent link="base_plate_link"/>
+		<child link="sonar"/>
+	</joint>
+
+	<link name="sonar">
+		<visual>
+			<origin rpy="0 0 -1.5708" xyz="0.0 0.0 0.0"/>
+			<geometry>
+				<mesh filename="package://robot_driver/stl/HC-SR04.stl" scale="0.001 0.001 0.001"/>
+			</geometry>
+			<material name="white"/>
+		</visual>
+		<collision>
+			<origin rpy="0 0 1.5708" xyz="0.0 0.0 0.0"/>
+			<geometry>
+				<mesh filename="package://robot_driver/stl/HC-SR04.stl" scale="0.001 0.001 0.001"/>
+			</geometry>
+		</collision>
+	</link>
+
 </robot>
