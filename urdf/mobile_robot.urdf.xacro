@@ -119,13 +119,13 @@
 		</collision>
 	</link>
 
-	<joint name="sonar_joint" type="fixed">
+	<joint name="ir_joint" type="fixed">
 		<origin xyz="0.0 0.163 0.025" rpy="0 0 1.5708"/>
 		<parent link="base_plate_link"/>
-		<child link="sonar"/>
+		<child link="ir_range"/>
 	</joint>
 
-	<link name="sonar">
+	<link name="ir_range">
 		<visual>
 			<origin rpy="0 0 -1.5708" xyz="0.0 0.0 0.0"/>
 			<geometry>

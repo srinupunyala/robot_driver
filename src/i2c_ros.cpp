@@ -1,5 +1,7 @@
 #include "i2c_ros.h"
 #include "ros/ros.h"
+#include "ros/time.h"
+
 
 namespace i2c_ros
 {
